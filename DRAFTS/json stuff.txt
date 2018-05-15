@@ -1,0 +1,14 @@
+Json.loads(obj)
+json.dumps(object)
+
+check with
+
+print type(obj)
+
+###Print the JSON Object
+print obj['results'][0]['dstaddr'][0]['q_origin_key']
+
+WHERE
+
+obj['results'] is a list and you can loop through it with a while loop
+obj['results'][0] is a dictionary and can be looped through

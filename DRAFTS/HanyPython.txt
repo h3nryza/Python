@@ -1,0 +1,16 @@
+HANDY PYTHON
+
+
+CLEAR SCREEN
+import os
+os.system('cls')  # on windows
+os.system('clear')  # on linux / os x
+
+Module inspect
+
+python -m pydoc sys
+
+import module
+
+dir(module)
+help(module)
