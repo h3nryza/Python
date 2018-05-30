@@ -19,9 +19,7 @@ class EasyCrypto(object):
     def encrypt(self, data):
         encoder = PKCS7Encoder()
         key = (Random.get_random_bytes(32))
-        print(data)
         data = encoder.encode(data)
-        print(data)
         iv = Random.new().read(16)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         Encoded_data = base64.b64encode(cipher.encrypt(data))
@@ -40,60 +38,67 @@ class EasyCrypto(object):
         iv = base64.b64decode(b64iv)
         encrypted = base64.b64decode(b64encrypted)
 
-
         cipher = AES.new(key, AES.MODE_CBC, iv)
         Decoded_data = self.unpad(cipher.decrypt(encrypted))
+        if Decoded_data[-2:] == "==":
+            return(base64.b64decode(Decoded_data))
         return Decoded_data
+
+    def sendToFile(self, inData, outData):
+        data = open(inData, 'rb').read()
+        fileOut = open(outData, 'w')
+        fileOut.write(self.encrypt(data))
+        fileOut.close()
+
+    def getFromFile(self, inData, outData):
+        data = open(inData, 'r').read()
+        fileOut = open(outData, 'wb')
+        fileOut.write(self.decrypt(data))
+        fileOut.close()
+
 
 if __name__ == '__main__':
     parser = OptionParser()
     parser.set_description('Easy Encryption')
-    parser.set_usage(''' SET THIS ''')
     parser.add_option("-i", "--input", dest='data', help="[REQUIRED] Data to be encrypted / decrypted")
     parser.add_option("-e", "--encrypt", action="store_true", dest="encrypt", help="Flag for encryption")
     parser.add_option("-d", "--decrypt", action="store_true", dest="decrypt", help="Flag for decryption")
     parser.add_option("-f", "--file", action="store_true", dest="input_file", help="Flag for file decrypt / encrypt")
-    parser.add_option("-o", "--outFile", action="store_true", dest="outFile", help="File for output")
+    parser.add_option("-o", "--outFile", dest="outFile", help="File for output")
 
     (options, args) = parser.parse_args()
     ec = EasyCrypto()
 
     #String data to encrypt, with output to screen
-    if options.input_file == None and options.encrypt != None and options.outFile == None:
+    if options.encrypt != None and options.outFile == None and options.input_file == None:
         print(ec.encrypt(options.data))
     #String data to decrypt, with output to screen
-    if options.input_file == None and options.decrypt != None and options.outFile == None:
+    if options.decrypt != None and options.outFile == None and options.input_file == None:
         print(ec.decrypt(options.data))
 
     # String data to encrypt, with output to file
-    if options.input_file == None and options.encrypt != None and options.outFile != None:
+    if  options.encrypt != None and options.outFile != None and options.input_file == None:
         fileOut = open(options.outFile, 'w')
         fileOut.write(ec.encrypt(options.data))
         fileOut.close()
     # String data to decrypt, with output to file
-    if options.input_file == None and options.decrypt != None and options.outFile != None:
+    if options.decrypt != None and options.outFile != None and options.input_file == None:
         fileOut = open(options.outFile, 'w')
         fileOut.write(ec.decrypt(options.data))
         fileOut.close()
 
     #File data to encrypt, output to screen
-    if options.input_file != None  and options.encrypt != None and options.outFile == None:
+    if options.encrypt != None and options.outFile != None:
         data = open(options.data, 'rb').read()
         print(ec.encrypt(data))
     # File data to decrypt, output to screen
-    if options.input_file != None  and options.decrypt != None and options.outFile == None:
+    if options.decrypt != None and options.outFile != None:
         data = open(options.data, 'rb').read()
         print(ec.decrypt(data))
 
     #File data to encrypt, output to file
-    if options.input_file != None  and options.encrypt != None and options.outFile != None:
-        data = open(options.data, 'rb').read()
-        fileOut = open(options.outFile, 'wb')
-        fileOut.write(ec.encrypt(options.data))
-        fileOut.close()
+    if options.encrypt != None and options.outFile != None:
+        ec.sendToFile(options.data, options.outFile)
     # File data to decrypt, output to file
-    if options.input_file != None  and options.decrypt != None and options.outFile != None:
-        data = open(options.data, 'rb').read()
-        fileOut = open(options.outFile, 'wb')
-        fileOut.write(ec.decrypt(options.data))
-        fileOut.close()
+    if options.decrypt != None and options.outFile != None:
+        ec.getFromFile(options.data,options.outFile)
