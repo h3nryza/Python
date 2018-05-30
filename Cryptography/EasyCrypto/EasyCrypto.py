@@ -3,11 +3,12 @@ import base64
 from Crypto.Cipher import AES
 from Crypto import Random
 from optparse import OptionParser
+from pkcs7 import PKCS7Encoder
 
 class EasyCrypto(object):
     __doc__ = '''This library is for making an Easy AES encryption with self created key'''
 
-    BS = 16
+    BS = 128
 
     def pad(self,s):
         return s + (self.BS - len(s) % self.BS) * chr(self.BS - len(s) % self.BS)
@@ -16,21 +17,32 @@ class EasyCrypto(object):
         return s[:-ord(s[len(s) - 1:])]
 
     def encrypt(self, data):
+        encoder = PKCS7Encoder()
         key = (Random.get_random_bytes(32))
-        b64Key = base64.b64encode(key)
-        data = self.pad(data)
-        iv = Random.new().read(AES.block_size)
+        print(data)
+        data = encoder.encode(data)
+        print(data)
+        iv = Random.new().read(16)
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        Encoded_data = base64.b64encode(iv + cipher.encrypt(data))
-        return b64Key + Encoded_data
+        Encoded_data = base64.b64encode(cipher.encrypt(data))
+
+        b64Key = base64.b64encode(key).encode("utf-8")
+        b64iv = base64.b64encode(iv).encode("utf-8")
+
+        return b64Key + b64iv + Encoded_data
 
     def decrypt(self, data):
-        key = base64.b64decode(data[:44])
-        data = data[44:]
-        enc = base64.b64decode(data)
-        iv = enc[:16]
+        b64key = data[:44]
+        b64iv = data[44:68]
+        b64encrypted = data[68:]
+
+        key = base64.b64decode(b64key)
+        iv = base64.b64decode(b64iv)
+        encrypted = base64.b64decode(b64encrypted)
+
+
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        Decoded_data = self.unpad(cipher.decrypt(enc[16:]))
+        Decoded_data = self.unpad(cipher.decrypt(encrypted))
         return Decoded_data
 
 if __name__ == '__main__':

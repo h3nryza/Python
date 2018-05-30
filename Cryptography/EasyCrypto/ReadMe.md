@@ -30,6 +30,9 @@ EasyCrypto.py -i "This Will De Decrypt, Printed to screen" -d                   
 EasyCrypto.py -i "This Will De Decrypt, Outputted to file" -d -o .//test         </br>
 EasyCrypto.py -i "This Will De Decrypt a file, Outputted to file" -d -f -o .//test </br>
 
+## Updates
+30-05-2018 : Added pkcs2 module to help with C# decryption
+
 ## License
 MIT copyright
 
